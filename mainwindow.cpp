@@ -201,9 +201,9 @@ void MainWindow::readData()
             QString saveData = single_Data+"  "+ QString::number(angleInt) +"  " + QString::number(distanceInt)  ;
 
             //生成数据文件
-            if(true == isSaveFlag)
+            if(true == isSaveFlag  && saveCircleNum >= 3)
             {
-                writeLog(saveData,saveCircleNum);
+                writeLog(saveData,saveCircleNum-3);
             }
 
            if(angleInt<lastAngleInt && (!Rece_points.empty()) )  //360度已经接收完毕 且只存储6个
