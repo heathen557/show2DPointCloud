@@ -11,7 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>点云数据二维显示软件</string>
+   <string>芯视界串口数据调试软件</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>icon_1.png</normaloff>icon_1.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QFormLayout" name="formLayout">

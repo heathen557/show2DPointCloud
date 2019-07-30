@@ -1,4 +1,4 @@
-#include "savefiledialog.h"
+﻿#include "savefiledialog.h"
 #include "ui_savefiledialog.h"
 #include "QFileDialog"
 #include"QDebug"
@@ -79,6 +79,7 @@ void saveFileDialog::on_SelFilePath_pushButton_clicked()
     file_path = QFileDialog::getExistingDirectory(this,"请选择模板保存路径...","./");
     if(file_path.isEmpty())
     {
+       qDebug()<<"没有选择路径"<<endl;
         return;
     }
     else
@@ -98,7 +99,7 @@ void saveFileDialog::on_pushButton_clicked()
 
     if(ui->radioButton_2->isChecked())
     {
-        qDebug()<<"选中了文件保存！！！！！！！"<<endl;
+        qDebug()<<"saveFileDialog has check the fileSave,file_path = "<<file_path<<endl;
         checkFlag = 1;
         emit saveSubmitSignal(true,showNum,showRadius);
     }else

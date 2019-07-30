@@ -88,7 +88,7 @@ public:
 
     void retranslateUi(QDialog *settingDialog)
     {
-        settingDialog->setWindowTitle(QApplication::translate("settingDialog", "Dialog", Q_NULLPTR));
+        settingDialog->setWindowTitle(QApplication::translate("settingDialog", "\344\270\262\345\217\243\350\256\276\347\275\256\347\225\214\351\235\242", Q_NULLPTR));
         gbox1->setTitle(QApplication::translate("settingDialog", "\344\270\262\345\217\243\345\217\202\346\225\260\350\256\276\347\275\256", Q_NULLPTR));
         label->setText(QApplication::translate("settingDialog", "\344\270\262\345\217\243\345\217\267\357\274\232", Q_NULLPTR));
         label_2->setText(QApplication::translate("settingDialog", "\346\263\242\347\211\271\347\216\207\357\274\232", Q_NULLPTR));

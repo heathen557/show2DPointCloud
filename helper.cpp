@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
 ** Copyright (C) 2016 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
@@ -68,7 +68,8 @@ Helper::Helper()
     gradient.setColorAt(0.0, Qt::white);
     gradient.setColorAt(1.0, QColor(0xa6, 0xce, 0x39));
 
-    background = QBrush(QColor(64, 64, 64));
+//    background = QBrush(QColor(64, 64, 64));
+    background = QBrush(QColor(0, 0, 0));
     circleBrush = QBrush(gradient);
 //    circlePen = QPen(Qt::black);
     circlePen = QPen(Qt::white);
@@ -95,8 +96,8 @@ void Helper::paint(QPainter *painter, QPaintEvent *event, int elapsed)
 {
 //    qDebug()<<" wid is  ==== "<<Window_wid<<endl;
 //    qDebug()<<" height is  ==== "<<Window_height<<endl;
-    qDebug()<<"half wid is  ==== "<<Window_wid/2<<endl;
-    qDebug()<<"half height is  ==== "<<Window_height/2<<endl;
+//    qDebug()<<"half wid is  ==== "<<Window_wid/2<<endl;
+//    qDebug()<<"half height is  ==== "<<Window_height/2<<endl;
 //    qDebug()<<"the show  AllPoint_vec's len = "<<AllPoint_vec.size()<<endl;
 
     painter->fillRect(event->rect(), background);
@@ -135,6 +136,11 @@ void Helper::paint(QPainter *painter, QPaintEvent *event, int elapsed)
             //显示15米时, 缩放系数为：15000/300 = 50
             //显示x米时， 缩放系数为：1000x/300 =10/3*x
             //当distance > 1000x时， distance = 1000x;
+
+            if(radiusMeter < 1)
+            {
+                radiusMeter = 10 ;  //缺省为10米
+             }
 
             if(distance > 1000*radiusMeter)
             {

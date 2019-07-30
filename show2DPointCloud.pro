@@ -29,12 +29,14 @@ SOURCES += main.cpp\
     helper.cpp \
     settingdialog.cpp \
     savefiledialog.cpp \
+    savelocalfile.cpp
 
 HEADERS  += mainwindow.h \
     glwidget.h \
     helper.h \
     settingdialog.h \
     savefiledialog.h \
+    savelocalfile.h
 
 FORMS    += mainwindow.ui \
     settingdialog.ui \

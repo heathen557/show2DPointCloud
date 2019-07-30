@@ -53,6 +53,9 @@ public:
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
         MainWindow->resize(824, 703);
+        QIcon icon;
+        icon.addFile(QStringLiteral("icon_1.png"), QSize(), QIcon::Normal, QIcon::Off);
+        MainWindow->setWindowIcon(icon);
         action = new QAction(MainWindow);
         action->setObjectName(QStringLiteral("action"));
         action_2 = new QAction(MainWindow);
@@ -130,7 +133,7 @@ public:
 
     void retranslateUi(QMainWindow *MainWindow)
     {
-        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "\347\202\271\344\272\221\346\225\260\346\215\256\344\272\214\347\273\264\346\230\276\347\244\272\350\275\257\344\273\266", Q_NULLPTR));
+        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "\350\212\257\350\247\206\347\225\214\344\270\262\345\217\243\346\225\260\346\215\256\350\260\203\350\257\225\350\275\257\344\273\266", Q_NULLPTR));
         action->setText(QApplication::translate("MainWindow", "\345\273\272\347\253\213\350\277\236\346\216\245", Q_NULLPTR));
         action_2->setText(QApplication::translate("MainWindow", "\346\226\255\345\274\200\350\277\236\346\216\245", Q_NULLPTR));
         action_3->setText(QApplication::translate("MainWindow", "\345\212\237\350\203\275\350\256\276\347\275\256", Q_NULLPTR));

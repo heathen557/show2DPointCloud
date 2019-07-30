@@ -1,4 +1,4 @@
-#ifndef MAINWINDOW_H
+﻿#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QMainWindow>
@@ -7,6 +7,8 @@
 #include<QTimer>
 #include<settingdialog.h>
 #include<savefiledialog.h>
+#include<savelocalfile.h>
+#include<QThread>
 
 namespace Ui {
 class MainWindow;
@@ -36,6 +38,14 @@ private:
     int saveCircleNum;      //log中显示的圈数
     int showCircleNum;
 
+    int firstAngle;
+    int secondAngle;
+    int thirdAngle;
+    int fourAngle;
+
+    saveLocalFile *saveLocalDia;
+    QThread *saveThread;
+
 
 public slots:
     void showSettingDialog();   //串口设置界面
@@ -44,11 +54,15 @@ public slots:
     void closeConnect();        //关闭串口
     void transCheckSlot();      //获取传输速率
     void showSaveFileDialog();  //文件保存设置界面
-    bool isDirExist(QString fullPath);  //判断文件夹是否存在,不存在则创建
-    void writeLog(QString text,int numOfFile);
+
     void saveSubmitSlot(bool isSave,int circleNum, int radiusMeter);  //接收是否保存命令
     bool msgCheck(QString msg);  //和校验
     int findComplement(int num);  //二进制取反
+
+signals:
+    void createDirSignal(QString);
+    void writeLogSignal(QString,int);
+
 };
 
 #endif // MAINWINDOW_H

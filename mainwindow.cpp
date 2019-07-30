@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include<QDebug>
 #include<QMessageBox>
@@ -28,13 +28,18 @@ MainWindow::MainWindow(QWidget *parent) :
     setDia = new settingDialog(this);
     serial = new QSerialPort(this);
 
+    saveLocalDia = new saveLocalFile;
+    saveThread = new QThread;
+    saveLocalDia->moveToThread(saveThread);
+    saveThread->start();
+
+
     int wid  = ui->widget->width();
     int height = ui->widget->height();
 
     ui->widget->helper.Window_wid = wid;
     ui->widget->helper.Window_height = height;
 
-    qDebug()<<"wid="<<wid<<"  height="<<height<<endl;
 
 
     connect(serial, &QSerialPort::readyRead, this, &MainWindow::readData);  //串口读数据
@@ -45,6 +50,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&transTimer,SIGNAL(timeout()),this,SLOT(transCheckSlot()));
     connect(&saveDia,SIGNAL(saveSubmitSignal(bool,int,int)),this,SLOT(saveSubmitSlot(bool,int,int)));
     connect(setDia,SIGNAL(saveSubmitSignal(bool,int,int)),this,SLOT(saveSubmitSlot(bool,int,int)));
+
+    //write log
+    connect(this,SIGNAL(createDirSignal(QString)),saveLocalDia,SLOT(isDirExist(QString)));
+    connect(this,SIGNAL(writeLogSignal(QString,int)),saveLocalDia,SLOT(writeLog(QString,int)));
+
 }
 
 MainWindow::~MainWindow()
@@ -55,7 +65,6 @@ MainWindow::~MainWindow()
 //@brief:打开串口设置界面
 void MainWindow::showSettingDialog()
 {
-    qDebug()<<"has coming"<<endl;
     setDia->show();
 }
 
@@ -73,7 +82,17 @@ void MainWindow::seriOpen_slot()
     //如果保存接收文件，则先创建文件夹
     if(true == isSaveFlag)
     {
-        isDirExist(fullDirPath);
+        if(fullDirPath.isEmpty())
+        {
+            QDateTime dt;
+            QTime time;
+            QDate date;
+            dt.setDate(date.currentDate());
+            QString currenttime = dt.toString("yyyy-MM-dd");
+             fullDirPath = saveDia.file_path + "/" + currenttime;
+        }
+        qDebug()<<"open seri ,fullDirPath ="<< fullDirPath<<endl;
+        emit createDirSignal(fullDirPath);
     }
 
 
@@ -151,90 +170,110 @@ void MainWindow::readData()
         int totallen = m_buffer.size();
         while(totallen)
         {
-            if(totallen <27)
+            if(totallen <66)    //一个报文至少要有66个字节
                 return;
 
-           int indexOf5A = m_buffer.indexOf("5A 03 04 ",0);
+           int indexOf5A = m_buffer.indexOf("FA",0);
            if(indexOf5A < 0)  //没有找到5A
            {
-               qDebug()<<QString::fromUtf8("接收数据有误，不存在5A")<<"index ="<<indexOf5A<<"buffer"<<m_buffer<<endl;
+               qDebug()<<QString::fromUtf8("msg maybe error,can't find FA")<<"index ="<<indexOf5A<<"buffer"<<m_buffer<<endl;
                return;
            }else if(indexOf5A>0)  //第一次的时候前面会有冗余数据，删掉
            {
                m_buffer = m_buffer.right(totallen-indexOf5A);
                totallen = m_buffer.size();
-               if(totallen <27)
+               qDebug()<<"the first msg ,has some Redundant data,  indexOf5A="<<indexOf5A<<"  the left msg = "<<m_buffer<<endl;
+               if(totallen <66)
                    return;
            }
 
-           //以下数据为5A打头数据
-
-           //进行和校验
-           QString single_Data = m_buffer.left(27);
+           //以下数据为FA打头数据
+           //进行校验的操作
+           QString single_Data = m_buffer.left(66);     //一帧数据
            if(!msgCheck(single_Data))
-                return;
+           {
+               qDebug()<<"msgCheck error!  single_Data ="<< single_Data <<endl;
+               m_buffer = m_buffer.right(totallen - 3);
+               totallen = m_buffer.size();
+               return;
+           }
+
+           //报文顺序标识 0xA0-0xF9:  0xA0: 0,1,2,3
+           int index = single_Data.mid(3,2).toInt(NULL,16);
+           if(index<160 || index>249)
+           {
+               qDebug()<<"index beyond the tolence,the dataAnalye mayebe error ,index = "<< index<<"  single_Data"<<  single_Data <<endl;
+               return;
+           }
+           firstAngle = (index-160)*4;                //每一组的第一个点对应的角度
+
+           //转速：2bytes 04 00
+           QString RotationSpeed_str = single_Data.mid(6,5);
+
+           //获取距离信息1      12 0C  PEAK: 88 13
+           QString distance_str1_ = single_Data.mid(15,2) + single_Data.mid(12,2);
+//           QString peak_str1 = single_Data.mid(21,2) + single_Data.mid(18,2);
+           int distanceInt_1 = distance_str1_.toInt(NULL,16);
+           Rece_points.push_back(firstAngle*10);
+           Rece_points.push_back(distanceInt_1);
 
 
-           //获取角度信息
-           QString angle_str_ = single_Data.mid(12,5);
-           angle_str_ = angle_str_.replace(" ", "");
-           QString s1=angle_str_[0];
-           QString s2=angle_str_[1];
-           QString s3=angle_str_[2];
-           QString s4=angle_str_[3];
-           QString angle_str = s3+s4+s1+s2;
-           int angleInt = angle_str.toInt(NULL,16);
-//           qDebug()<<"角度"<<QString::number(angleInt);
+           //获取距离信息2      3F 5A  PEAK: 03 04
+           QString distance_str2_ = single_Data.mid(27,2) + single_Data.mid(24,2);
+//           QString peak_str2 = single_Data.mid(33,2) + single_Data.mid(30,2);
+           int distanceInt_2 = distance_str2_.toInt(NULL,16);
+           secondAngle = firstAngle + 1;
+           Rece_points.push_back(secondAngle*10);
+           Rece_points.push_back(distanceInt_2);
 
-           //获取距离信息(mm)
-           QString distance_str_ = single_Data.mid(18,5);
-           distance_str_ = distance_str_.replace(" ", "");
-           s1=distance_str_[0];
-           s2=distance_str_[1];
-           s3=distance_str_[2];
-           s4=distance_str_[3];
-           QString distance_str = s3+s4+s1+s2;
-           int distanceInt = distance_str.toInt(NULL,16);
-//           qDebug()<<"距离"<<QString::number(distanceInt);
+           //获取距离信息3      00 12  PEAK: 0C 88
+           QString distance_str3_ = single_Data.mid(39,2) + single_Data.mid(36,2);
+//           QString peak_str3 = single_Data.mid(45,2) + single_Data.mid(42,2);
+           int distanceInt_3 = distance_str3_.toInt(NULL,16);
+           thirdAngle = firstAngle + 2;
+           Rece_points.push_back(thirdAngle*10);
+           Rece_points.push_back(distanceInt_3);
 
-//            qDebug()<<" singleData = "<<single_Data<<"angle = "<<angleInt<<"  distance="<<distanceInt<<" x="<<x <<" y="<<y<<endl;
-            QString saveData = single_Data+"  "+ QString::number(angleInt) +"  " + QString::number(distanceInt)  ;
+           //获取距离信息4      13 3F  PEAK:3F 4F
+           QString distance_str4_ = single_Data.mid(51,2) + single_Data.mid(48,2);
+//           QString peak_str4 = single_Data.mid(57,2) + single_Data.mid(54,2);
+           int distanceInt_4 = distance_str4_.toInt(NULL,16);
+           fourAngle = firstAngle + 3;
+           Rece_points.push_back(fourAngle*10);
+           Rece_points.push_back(distanceInt_4);
+
+            qDebug()<<" singleData = "<<single_Data<<"firstAngle = "<<firstAngle<<"  distanceInt_1="<<distanceInt_1<<endl;
+            QString saveData = single_Data+"  "+ QString::number(firstAngle) +"  " + QString::number(distanceInt_1)  ;
 
             //生成数据文件
             if(true == isSaveFlag  && saveCircleNum >= 3)
             {
-                writeLog(saveData,saveCircleNum-3);
+//             writeLog(saveData,saveCircleNum-3);
+               emit writeLogSignal(saveData,saveCircleNum-3);
             }
 
-           if(angleInt<lastAngleInt && (!Rece_points.empty()) )  //360度已经接收完毕 且只存储6个
+           if(359 == fourAngle && (!Rece_points.empty()) )  //360度已经接收完毕
            {
                saveCircleNum++;
                numOfCircle++;
 
                AllPoint_vec.push_back(Rece_points);
                Rece_points.clear();
-//               qDebug()<<"已经接收了***************"<<AllPoint_vec.size()<<endl;
 
-               if(AllPoint_vec.size() >= showCircleNum)  //循环清理第一个元素
+               if(AllPoint_vec.size() == showCircleNum)  //循环清理第一个元素
                {
                    AllPoint_vec.erase(AllPoint_vec.begin(),AllPoint_vec.begin()+1);
+
                }
-
-
+               if(AllPoint_vec.size() > showCircleNum)
+               {
+                   AllPoint_vec.clear();
+               }
            }
-           lastAngleInt = angleInt;
 
-
-           Rece_points.push_back(angleInt);
-           Rece_points.push_back(distanceInt);
-//           qDebug()<<"vector's len = "<<Rece_points.size();
-
-
-           m_buffer = m_buffer.right(totallen - 27);
+           m_buffer = m_buffer.right(totallen - 66);
            totallen = m_buffer.size();
 //         qDebug()<<"total ="<<totallen<<endl;
-
-
 
         }
     }
@@ -243,25 +282,48 @@ void MainWindow::readData()
 //和校验
 bool MainWindow:: msgCheck(QString msg)
 {
-    QString str1 = msg.mid(3,2);
-    QString str2 = msg.mid(6,2);
-    QString str3 = msg.mid(9,2);
-    QString str4 = msg.mid(12,2);
-    QString str5 = msg.mid(15,2);
-    QString str6 = msg.mid(18,2);
-    QString str7 = msg.mid(21,2);
-    QString str8 = msg.mid(24,2);
 
-    int num = str1.toInt(NULL,16)+str2.toInt(NULL,16)+str3.toInt(NULL,16)+str4.toInt(NULL,16)+str5.toInt(NULL,16)+str6.toInt(NULL,16)+str7.toInt(NULL,16);
-//    qDebug()<<num<<"    "<<findComplement(num);
+    QString str1 = msg.mid(3,2)+ msg.mid(0,2);
+    QString str2 = msg.mid(9,2)+ msg.mid(6,2);
+    QString str3 = msg.mid(15,2)+ msg.mid(12,2);
+    QString str4 = msg.mid(21,2)+ msg.mid(18,2);
+    QString str5 = msg.mid(27,2)+ msg.mid(24,2);
+    QString str6 = msg.mid(33,2)+ msg.mid(30,2);
+    QString str7 = msg.mid(39,2)+ msg.mid(36,2);
+    QString str8 = msg.mid(45,2)+ msg.mid(42,2);
+    QString str9 = msg.mid(51,2)+ msg.mid(48,2);
+    QString str10 = msg.mid(57,2)+ msg.mid(54,2);
 
-    if(findComplement(num) == str8.toInt(NULL,16))
-    {
+    QString checkStr = msg.mid(63,2) + msg.mid(60,2);
+    int checkNum = checkStr.toInt(NULL,16);
+
+    int data[10] ;
+    data[0] = str1.toInt(NULL,16);
+    data[1] = str2.toInt(NULL,16);
+    data[2] = str3.toInt(NULL,16);
+    data[3] = str4.toInt(NULL,16);
+    data[4] = str5.toInt(NULL,16);
+    data[5] = str6.toInt(NULL,16);
+    data[6] = str7.toInt(NULL,16);
+    data[7] = str8.toInt(NULL,16);
+    data[8] = str9.toInt(NULL,16);
+    data[9] = str10.toInt(NULL,16);
+
+    int checksum_32 = 0;
+    for(int i=0; i<10; i++)
+        checksum_32 = (checksum_32<<1) + data[i];
+
+    int result;
+    result = (checksum_32>>15) + (checksum_32 & 0x7FFF);
+    result = result & 0x7FFF;
+//    qDebug()<<" result = "<<result<<endl;
+
+    if(result == checkNum)
         return true;
-    }else
-    {
-        false;
-    }
+    else
+        return false;
+
+
 }
 
 int MainWindow::findComplement(int num)
@@ -303,55 +365,23 @@ void MainWindow::saveSubmitSlot(bool isSave,int circleNum, int radiusMeter)
         QString dirPath = saveDia.file_path + "/" + currenttime;
         if(serial->isOpen())    //如果端口打开则创建，否则不创建
         {
-            isDirExist(dirPath);
+            if(dirPath.isEmpty())
+            {
+                QMessageBox::information(NULL,"warn","the Dir is empty,please check!");
+            }else
+            {
+//                isDirExist(dirPath);
+                emit createDirSignal(dirPath);
+            }
+
         }
 //        fullDirPath = dirPath;
         isSaveFlag = true;
     }
 
-}
-
-
-//@brief:判断文件夹是否存在,不存在则创建
-bool MainWindow::isDirExist(QString fullPath)
-{
-    qDebug()<<"即将要进行判断的目录为:"<<fullPath<<endl;
-    QDir dir(fullPath);
-    if(dir.exists())
-    {
-      qDebug()<<fullPath<<"已经存在"<<endl;
-      dirCurIndex++;
-      fullDirPath = fullPath + "_1";
-      isDirExist(fullDirPath);
-      return true;
-    }
-    else
-    {
-       qDebug()<<"fullDirPath = "<<fullPath<<endl;
-       fullDirPath = fullPath;
-       dirCurIndex = 0;
-       bool ok = dir.mkdir(fullDirPath);//只创建一级子目录，即必须保证上级目录存在
-       return ok;
-    }
-}
-
-
-//按照标识写文件
-// input:text:写入文本的内容
-// numOfFile：第几个文件
-void MainWindow::writeLog(QString text,int numOfFile)
-{
-
-//    qDebug()<<"初始化时 槽函数已经进来 "<<endl;
-//    ui->widget->helper.radiusMeter = radiusMeter ;   //显示半径到底要多少米
-
-    QString sFilePath=fullDirPath + "/"+QString::number(numOfFile)+".txt";
-    QFile file(sFilePath);
-    file.open(QIODevice::WriteOnly|QIODevice::Text|QIODevice::Append);
-
-    QTextStream out(&file);
-    out<<text.toLocal8Bit()<<endl;
-    file.close();
-
+    isSaveFlag = isSave;
 
 }
+
+
+
