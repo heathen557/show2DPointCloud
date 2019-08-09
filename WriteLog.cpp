@@ -4,7 +4,6 @@
 #include <qtextcodec.h>
 #include <QMutex>
 
-extern QString file_name;
 void WriteLogFile(QString filename ,int flag,QString msg)
 {
 
@@ -70,7 +69,7 @@ void createlogdir(QString logdir)
     }
 }
 
-QString currentdate()
+QString  currentdate()
 {
      QDateTime dt;
      QTime time;
@@ -93,7 +92,7 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
     switch(type)
     {
     case QtDebugMsg:
-        strMsg = QString("Data:");
+        strMsg = QString("info:");
         break;
     case QtWarningMsg:
         strMsg = QString("Warning:");
@@ -110,14 +109,15 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
     }
     QString context_info = QString("File:(%1) Line:(%2)").arg(QString(context.file)).arg(context.line);
 
-    QString strDateTime = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss ddd");
-    QString strMessage = QString("%1%2,DateTime:%3,%4").arg(strMsg)
-            .arg(msg).arg(strDateTime).arg(context_info);
+//    QString strDateTime = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss ddd");
+//    QString strMessage = QString("%1%2,DateTime:%3,%4").arg(strMsg)
+//            .arg(msg).arg(strDateTime).arg(context_info);
+
+    QString strMessage = QString("%1%2").arg(strMsg)
+            .arg(msg);
 
 
-
-    createlogdir(file_name);
-
+    createlogdir("ClientLog");
     QString timenow=currentdate();
     QString LogFile="ClientLog/"+timenow+".txt";
 

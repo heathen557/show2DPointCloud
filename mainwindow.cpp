@@ -14,7 +14,7 @@
 #include<time.h>
 using namespace std;
 
- vector<int> Rece_points;
+vector<int> Rece_points;
 extern vector<vector<int>> AllPoint_vec;
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -203,6 +203,8 @@ void MainWindow::readData()
            if(index<160 || index>249)
            {
                qDebug()<<"index beyond the tolence,the dataAnalye mayebe error ,index = "<< index<<"  single_Data"<<  single_Data <<endl;
+               m_buffer = m_buffer.right(totallen - 3);
+               totallen = m_buffer.size();
                return;
            }
            firstAngle = (index-160)*4;                //每一组的第一个点对应的角度

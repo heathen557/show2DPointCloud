@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>功能设置界面</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>icon_1.png</normaloff>icon_1.png</iconset>
+  </property>
   <widget class="QGroupBox" name="groupBox">
    <property name="geometry">
     <rect>

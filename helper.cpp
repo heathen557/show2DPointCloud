@@ -74,14 +74,14 @@ Helper::Helper()
 //    circlePen = QPen(Qt::black);
     circlePen = QPen(Qt::white);
 
-    axiPen = QPen(Qt::white);
+    axiPen = QPen(Qt::gray);
     axiPen.setMiterLimit(0.2);
 
 
-    QVector<qreal> dashes;
-    qreal space = 5;
-    dashes << 1<< space << 1 <<space;
-    axiPen.setDashPattern(dashes);
+//    QVector<qreal> dashes;
+//    qreal space = 5;
+//    dashes << 1<< space << 1 <<space;
+//    axiPen.setDashPattern(dashes);
 
     circlePen.setWidthF(1);
     textPen = QPen(Qt::green);
@@ -107,7 +107,7 @@ void Helper::paint(QPainter *painter, QPaintEvent *event, int elapsed)
 //! [2]
     painter->save();
 //    painter->setBrush(circleBrush);
-    painter->setPen(circlePen);
+    painter->setPen(axiPen);
 //    painter->rotate(elapsed * 0.030);
 
     //************************************
@@ -117,6 +117,7 @@ void Helper::paint(QPainter *painter, QPaintEvent *event, int elapsed)
     painter->drawLine(QPoint(0,Window_height/2),QPoint(Window_wid,Window_height/2));
     painter->drawLine(QPoint(Window_wid/2,0),QPoint(Window_wid/2,Window_height));
 
+    painter->setPen(circlePen);
     QPointF pointf[10000];
     int allLen = AllPoint_vec.size();
     for(int m=0; m<allLen; m++)

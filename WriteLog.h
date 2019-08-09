@@ -13,6 +13,4 @@ void createlogdir(QString logdir);
 void WriteLogFile(QString filename ,int flag,QString msg);
 QString  currentdate();
 void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg);
-
-//QString file_path;
 #endif //LISTENSET_H

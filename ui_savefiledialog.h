@@ -53,6 +53,9 @@ public:
         if (saveFileDialog->objectName().isEmpty())
             saveFileDialog->setObjectName(QStringLiteral("saveFileDialog"));
         saveFileDialog->resize(511, 449);
+        QIcon icon;
+        icon.addFile(QStringLiteral("icon_1.png"), QSize(), QIcon::Normal, QIcon::Off);
+        saveFileDialog->setWindowIcon(icon);
         groupBox = new QGroupBox(saveFileDialog);
         groupBox->setObjectName(QStringLiteral("groupBox"));
         groupBox->setGeometry(QRect(40, 40, 451, 111));
