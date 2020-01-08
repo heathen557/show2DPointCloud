@@ -27,30 +27,31 @@ saveFileDialog::saveFileDialog(QWidget *parent) :
        }
 
        showCircleNum = line[2].toInt();
-       int saveFlag = line[3].toInt();
-       file_path = line[4];
-       showRadiusMeter = line[5].toInt();
+//       int saveFlag = line[3].toInt();
+//       file_path = line[4];
+//       showRadiusMeter = line[5].toInt();
 
-       if(0 == saveFlag)   //不保存成文件
-       {
-            ui->radioButton->setChecked(true);
-            ui->lineEdit->setEnabled(false);
-            ui->SelFilePath_pushButton->setEnabled(false);
-       }else        //保存成文件
-       {
-           ui->lineEdit->setEnabled(true);
-           ui->SelFilePath_pushButton->setEnabled(true);
-           ui->radioButton_2->setChecked(true);
+       ui->radioButton->setChecked(true);
+       ui->lineEdit->setEnabled(false);
+       ui->SelFilePath_pushButton->setEnabled(false);
+//       if(0 == saveFlag)   //不保存成文件
+//       {
 
-           emit saveSubmitSignal(true,showCircleNum,showRadiusMeter);
-       }
+//       }else        //保存成文件
+//       {
+//           ui->lineEdit->setEnabled(true);
+//           ui->SelFilePath_pushButton->setEnabled(true);
+//           ui->radioButton_2->setChecked(true);
+
+//           emit saveSubmitSignal(true,showCircleNum,showRadiusMeter);
+//       }
 
 
 //    file_path = QCoreApplication::applicationDirPath();
-     qDebug()<<" file_path ="<<file_path<<endl;
+//     qDebug()<<" file_path ="<<file_path<<endl;
       ui->showNum_lineEdit->setText(line[2]);
-      ui->lineEdit->setText(file_path);
-      ui->radius_lineEdit->setText(QString::number(showRadiusMeter));
+//      ui->lineEdit->setText(file_path);
+
 
 }
 
@@ -95,8 +96,7 @@ void saveFileDialog::on_pushButton_clicked()
 {
     int checkFlag;
     int showNum = ui->showNum_lineEdit->text().toInt();
-    int showRadius = ui->radius_lineEdit->text().toInt();
-
+    int showRadius= 0;
     if(ui->radioButton_2->isChecked())
     {
         qDebug()<<"saveFileDialog has check the fileSave,file_path = "<<file_path<<endl;
@@ -128,7 +128,7 @@ void saveFileDialog::on_pushButton_clicked()
     {
         QByteArray writeData;
         writeData = line[0].toLatin1()+ temp + line[1].toLatin1()+temp+\
-                ui->showNum_lineEdit->text().toLatin1()+ temp +QString::number(checkFlag).toLatin1()+ temp+file_path.toLatin1() + temp + ui->radius_lineEdit->text().toLatin1();
+                QString::number(showNum).toLatin1() ;
         if (-1 == file.write(writeData))
         {
             qDebug()<<"ERROR";

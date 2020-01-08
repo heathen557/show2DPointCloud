@@ -1,4 +1,4 @@
-#include "settingdialog.h"
+﻿#include "settingdialog.h"
 #include "ui_settingdialog.h"
 #include<QMessageBox>
 #include<QDebug>
@@ -52,6 +52,8 @@ void settingDialog::seriaPort_init()
     ui->baudRateBox->addItem(QStringLiteral("38400"), QSerialPort::Baud38400);
     ui->baudRateBox->addItem(QStringLiteral("115200"), QSerialPort::Baud115200);
     ui->baudRateBox->addItem(QStringLiteral("256000"), QSerialPort::Baud256000);
+    ui->baudRateBox->addItem(QStringLiteral("256000"), QSerialPort::Baud256000);
+    ui->baudRateBox->addItem(QStringLiteral("460800"), QSerialPort::Baud460800);
     ui->baudRateBox->addItem(tr("Custom"));
     ui->baudRateBox->setCurrentIndex(baudRateBox_);
 
@@ -146,12 +148,11 @@ void settingDialog::on_btnOpen_clicked()
          int seriNum = ui->serialPortInfoListBox->currentIndex();
          int baudBox = ui->baudRateBox->currentIndex();
 
-
          if(file.open(QIODevice::WriteOnly))
          {
              QByteArray writeData;
              writeData = QString::number(seriNum).toLatin1()+ temp + QString::number(baudBox).toLatin1()+temp+\
-                     line[2].toLatin1()+ temp +line[3].toLatin1()+ temp+ line[4].toLatin1()+ temp +line[5].toLatin1();
+                     line[2].toLatin1();
              if (-1 == file.write(writeData))
              {
                  qDebug()<<"ERROR";
@@ -159,31 +160,22 @@ void settingDialog::on_btnOpen_clicked()
              file.close();
          }
 
-        int saveInt = line[3].toInt();
-        bool saveFlag ;
-        if(1 == saveInt)
-        {
-            saveFlag = true;
-        }else
-        {
-            saveFlag = false;
-        }
-        int showCircleNum = line[2].toInt();
-        int showRadiusMeter = line[5].toInt();
+//        int saveInt = line[3].toInt();
+//        bool saveFlag ;
+//        if(1 == saveInt)
+//        {
+//            saveFlag = true;
+//        }else
+//        {
+//            saveFlag = false;
+//        }
 
-        saveSubmitSignal(saveFlag,showCircleNum,showRadiusMeter);
+        bool saveFlag = false;
+        int showCircleNum = line[2].toInt() ;
 
+
+        saveSubmitSignal(saveFlag,showCircleNum,0);
 
     }
-//    else
-    {
-//        serial->close();
-//        ui->widget->timer.stop();
-//        transTimer.stop();
-//        ui->labIsOpen->setText("串口状态：关闭");
-//        ui->label_show_1->setText("0 bps");
-//        ui->label_show_2->setText("0 ms ");
-//        AllPoint_vec.clear();
-//        ui->btnOpen->setText("打开串口");
-    }
+
 }

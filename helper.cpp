@@ -59,7 +59,9 @@
 #include<math.h>
 using namespace std;
 
-vector<vector<int>> AllPoint_vec;
+vector<vector<float>> AllPoint_vec;
+
+#define pi 3.14159
 
 //! [0]
 Helper::Helper()
@@ -68,7 +70,6 @@ Helper::Helper()
     gradient.setColorAt(0.0, Qt::white);
     gradient.setColorAt(1.0, QColor(0xa6, 0xce, 0x39));
 
-//    background = QBrush(QColor(64, 64, 64));
     background = QBrush(QColor(0, 0, 0));
     circleBrush = QBrush(gradient);
 //    circlePen = QPen(Qt::black);
@@ -77,15 +78,22 @@ Helper::Helper()
     axiPen = QPen(Qt::gray);
     axiPen.setMiterLimit(0.2);
 
-
-//    QVector<qreal> dashes;
-//    qreal space = 5;
-//    dashes << 1<< space << 1 <<space;
-//    axiPen.setDashPattern(dashes);
-
     circlePen.setWidthF(1);
     textPen = QPen(Qt::green);
     textFont.setPixelSize(50);
+
+
+
+    rotate = 0.01;
+
+
+   clickAngle = 0;
+   ang = 0;
+   distance = 0;
+   show_x = 0;
+   show_y = 0;
+   showDistance = 0;
+
 
 
 }
@@ -94,24 +102,30 @@ Helper::Helper()
 //! [1]
 void Helper::paint(QPainter *painter, QPaintEvent *event, int elapsed)
 {
+
+
+//    qDebug()<<"paint";
+
 //    qDebug()<<" wid is  ==== "<<Window_wid<<endl;
 //    qDebug()<<" height is  ==== "<<Window_height<<endl;
 //    qDebug()<<"half wid is  ==== "<<Window_wid/2<<endl;
 //    qDebug()<<"half height is  ==== "<<Window_height/2<<endl;
 //    qDebug()<<"the show  AllPoint_vec's len = "<<AllPoint_vec.size()<<endl;
 
-    painter->fillRect(event->rect(), background);
-//    painter->translate(100, 100);
-//! [1]
 
-//! [2]
+
+    painter->fillRect(event->rect(), background);
+
+//    qDebug()<<"event->rect = "<<event->rect().width()<<"   "<<event->rect().height();
+
     painter->save();
-//    painter->setBrush(circleBrush);
+
     painter->setPen(axiPen);
-//    painter->rotate(elapsed * 0.030);
+
+
+
 
     //************************************
-
 
     painter->setRenderHint(QPainter::SmoothPixmapTransform, true);
     painter->drawLine(QPoint(0,Window_height/2),QPoint(Window_wid,Window_height/2));
@@ -120,6 +134,9 @@ void Helper::paint(QPainter *painter, QPaintEvent *event, int elapsed)
     painter->setPen(circlePen);
     QPointF pointf[10000];
     int allLen = AllPoint_vec.size();
+
+//    qDebug()<<"allLen = "<<allLen;
+
     for(int m=0; m<allLen; m++)
     {
         int len =AllPoint_vec[m].size();
@@ -129,30 +146,46 @@ void Helper::paint(QPainter *painter, QPaintEvent *event, int elapsed)
             pointf[pointNum].setX(0);
             pointf[pointNum].setY(0);
 
-            int ang = AllPoint_vec[m][n];
-            int distance = AllPoint_vec[m][n+1];
-//            qDebug()<<"ang="<<ang/10.0<<"  distance="<<distance<<endl;
+            ang = AllPoint_vec[m][n];
+            distance = AllPoint_vec[m][n+1];
+
+
+
 
             //半径的像素个数为300，显示30米时,distance = 30000 ; 缩放系数为：30000/300 = 100
             //显示15米时, 缩放系数为：15000/300 = 50
             //显示x米时， 缩放系数为：1000x/300 =10/3*x
             //当distance > 1000x时， distance = 1000x;
+            /*
+             *        半径像素     显示像素距离
+             *     ---------- = -------------
+             *     设置的最大距离    当前的距离
+             * */
 
-            if(radiusMeter < 1)
-            {
-                radiusMeter = 10 ;  //缺省为10米
-             }
+            //  distance的单位是毫米 记得显示的最大值为10米
+//            if(radiusMeter < 1)
+//            {
+//                radiusMeter = 10 ;  //缺省为10米
+//             }
 
-            if(distance > 1000*radiusMeter)
+            if(distance > 1000*10)     //超过10m统一设置为10M
             {
-                distance = 1000.0 * radiusMeter ;
+                distance = 1000.0 * 10 ;
             }
-            float coefficient = 1000.0 * radiusMeter/300.0;
 
+            double x = distance * sin(ang/180.0*pi) * rotate;
+            double y = -1 * distance * cos(ang/180.0*pi) * rotate;
 
+//            qDebug()<<"ang="<<ang<<"  x="<<x<<"  y="<<y;
 
-            double x = distance * sin(ang/10.0/180.0*3.14)/coefficient;
-            double y = -1 * distance * cos(ang/10.0/180.0*3.14)/coefficient;
+            if(ang == clickAngle)
+            {
+                show_x = x;
+                show_y = y;
+                showDistance = distance;
+
+//                qDebug()<<"clickAngle="<<clickAngle<<"   show_x="<<show_x<<"   show_y="<<show_y;
+            }
 
             pointf[pointNum].setX(x + Window_wid/2.0);
             pointf[pointNum].setY(y + Window_height/2.0);
@@ -169,88 +202,18 @@ void Helper::paint(QPainter *painter, QPaintEvent *event, int elapsed)
 
     //************************************
 
-    painter->setPen(circlePen);
-    qreal r = elapsed / 1000.0;
-    int n = 30;
-    for (int i = 0; i < n; ++i) {
-//        painter->rotate(30);
-        qreal factor = (i + r) / n;
-        qreal radius = 0 + 120.0 * factor;
-        qreal circleRadius = 1 + factor * 20;
-//        painter->drawEllipse(QRectF(-10+Window_wid/2, -10+Window_height/2,
-//                                    20, 20));
-//        painter->drawEllipse(QRectF(-20+Window_wid/2, -20+Window_height/2,
-//                                    40, 40));
-//        painter->drawEllipse(QRectF(-30+Window_wid/2, -30+Window_height/2,
-//                                    60, 60));
-//        painter->drawEllipse(QRectF(-40+Window_wid/2, -40+Window_height/2,
-//                                    80, 80));
-//        painter->drawEllipse(QRectF(-50+Window_wid/2, -50+Window_height/2,
-//                                    100, 100));
-//        painter->drawEllipse(QRectF(-60+Window_wid/2, -60+Window_height/2,
-//                                    120, 120));
-//        painter->drawEllipse(QRectF(-70+Window_wid/2, -70+Window_height/2,
-//                                    140, 140));
-//        painter->drawEllipse(QRectF(-80+Window_wid/2, -80+Window_height/2,
-//                                    160, 160));
-//        painter->drawEllipse(QRectF(-90+Window_wid/2, -90+Window_height/2,
-//                                    180, 180));
-//        painter->drawEllipse(QRectF(-100+Window_wid/2, -100+Window_height/2,
-//                                    200, 200));
-
-
-//        painter->drawEllipse(QRectF(-50+Window_wid/2, -50+Window_height/2,
-//                                    100, 100));
-//        painter->drawLine(QRectF(0, 25,
-//                                 20, 20));
-
-        //坐标轴画线
-//        painter->drawLine(QPoint(0,Window_height/2),QPoint(Window_wid,Window_height/2));
-//        painter->drawLine(QPoint(Window_wid/2,0),QPoint(Window_wid/2,Window_height));
-
-
-        //30度
-//        double x1 = Window_wid/2+Window_height/2*tan(60.0/180.0*3.1415925);
-//        double x2 = Window_wid/2-Window_height/2*tan(60.0/180.0*3.1415925);
-//        painter->drawLine(QPoint(x1,0),QPoint(x2,Window_height));
-
-//        x1 = Window_wid/2+Window_height/2*tan(30.0/180.0*3.1415925);
-//        x2 = Window_wid/2-Window_height/2*tan(30.0/180.0*3.1415925);
-//        painter->drawLine(QPoint(x1,0),QPoint(x2,Window_height));
-
-//        x1 = Window_wid/2-Window_height/2*tan(60.0/180.0*3.1415925);
-//        x2 = Window_wid/2+Window_height/2*tan(60.0/180.0*3.1415925);
-//        painter->drawLine(QPoint(x1,0),QPoint(x2,Window_height));
-
-//        x1 = Window_wid/2-Window_height/2*tan(30.0/180.0*3.1415925);
-//        x2 = Window_wid/2+Window_height/2*tan(30.0/180.0*3.1415925);
-//        painter->drawLine(QPoint(x1,0),QPoint(x2,Window_height));
-
-
-
-//        QPointF pointf[10000];
-//        for(int j=0; j<100; j++)
-//        {
-//            pointf[j].setX(2.0+i*8);
-//            pointf[j].setY(103+i);
-//        }
-
-
-//        painter->drawPoints(pointf,10000);
-//        painter->drawPoint(700,520);
-
-
-
-    }
     painter->restore();
-//! [2]
 
 //! [3]
     painter->setPen(textPen);
 //    painter->setFont(textFont);
-    painter->drawText(QRect(Window_wid-30, Window_height/2, 30, 20), Qt::AlignCenter, QStringLiteral("90"));
-    painter->drawText(QRect(Window_wid/2, 0, 30, 20), Qt::AlignCenter, QStringLiteral("0"));
-    painter->drawText(QRect(Window_wid/2, Window_height-20, 30, 20), Qt::AlignCenter, QStringLiteral("180"));
-    painter->drawText(QRect(0, Window_height/2, 30, 20), Qt::AlignCenter, QStringLiteral("270"));
+    painter->drawText(QRect(Window_wid-30, Window_height/2, 30, 20), Qt::AlignCenter, QStringLiteral("90°"));
+    painter->drawText(QRect(Window_wid/2, 0, 30, 20), Qt::AlignCenter, QStringLiteral("0°"));
+    painter->drawText(QRect(Window_wid/2, Window_height-20, 30, 20), Qt::AlignCenter, QStringLiteral("180°"));
+    painter->drawText(QRect(0, Window_height/2, 30, 20), Qt::AlignCenter, QStringLiteral("270°"));
+
+
+    QString strShow = QString::number(clickAngle)+QStringLiteral("°; ") +QString::number(showDistance) + "mm";
+    painter->drawText(QRect(Window_wid/2.0+show_x, Window_height/2.0+show_y-15, 100, 30), Qt::AlignCenter, strShow);
 }
 //! [3]

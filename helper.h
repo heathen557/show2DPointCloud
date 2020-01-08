@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 **
 ** Copyright (C) 2016 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
@@ -69,6 +69,16 @@ public:
     int Window_height;
 
     int radiusMeter;               //半径显示多少米
+
+    float rotate;
+
+    int clickAngle;
+    float ang;
+    int distance;
+
+    int show_x;
+    int show_y;
+    int showDistance;
 
 private:
     QBrush background;

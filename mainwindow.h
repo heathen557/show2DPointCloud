@@ -38,13 +38,14 @@ private:
     int saveCircleNum;      //log中显示的圈数
     int showCircleNum;
 
+    int saveFileIndex;
+
     int firstAngle;
-    int secondAngle;
-    int thirdAngle;
-    int fourAngle;
 
     saveLocalFile *saveLocalDia;
     QThread *saveThread;
+
+    float receRotation;     //协议中携带的转速
 
 
 public slots:
@@ -63,6 +64,8 @@ signals:
     void createDirSignal(QString);
     void writeLogSignal(QString,int);
 
+private slots:
+    void on_startRotate_pushButton_clicked();
 };
 
 #endif // MAINWINDOW_H

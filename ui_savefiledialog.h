@@ -43,10 +43,6 @@ public:
     QHBoxLayout *horizontalLayout_2;
     QLabel *label_2;
     QLineEdit *showNum_lineEdit;
-    QWidget *layoutWidget_2;
-    QHBoxLayout *horizontalLayout_3;
-    QLabel *label_3;
-    QLineEdit *radius_lineEdit;
 
     void setupUi(QDialog *saveFileDialog)
     {
@@ -100,7 +96,7 @@ public:
         groupBox_2->setGeometry(QRect(40, 160, 451, 121));
         layoutWidget1 = new QWidget(groupBox_2);
         layoutWidget1->setObjectName(QStringLiteral("layoutWidget1"));
-        layoutWidget1->setGeometry(QRect(70, 30, 213, 22));
+        layoutWidget1->setGeometry(QRect(70, 30, 213, 24));
         horizontalLayout_2 = new QHBoxLayout(layoutWidget1);
         horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
         horizontalLayout_2->setContentsMargins(0, 0, 0, 0);
@@ -113,22 +109,6 @@ public:
         showNum_lineEdit->setObjectName(QStringLiteral("showNum_lineEdit"));
 
         horizontalLayout_2->addWidget(showNum_lineEdit);
-
-        layoutWidget_2 = new QWidget(groupBox_2);
-        layoutWidget_2->setObjectName(QStringLiteral("layoutWidget_2"));
-        layoutWidget_2->setGeometry(QRect(70, 60, 213, 22));
-        horizontalLayout_3 = new QHBoxLayout(layoutWidget_2);
-        horizontalLayout_3->setObjectName(QStringLiteral("horizontalLayout_3"));
-        horizontalLayout_3->setContentsMargins(0, 0, 0, 0);
-        label_3 = new QLabel(layoutWidget_2);
-        label_3->setObjectName(QStringLiteral("label_3"));
-
-        horizontalLayout_3->addWidget(label_3);
-
-        radius_lineEdit = new QLineEdit(layoutWidget_2);
-        radius_lineEdit->setObjectName(QStringLiteral("radius_lineEdit"));
-
-        horizontalLayout_3->addWidget(radius_lineEdit);
 
 
         retranslateUi(saveFileDialog);
@@ -148,7 +128,6 @@ public:
         pushButton_2->setText(QApplication::translate("saveFileDialog", "\345\217\226\346\266\210", Q_NULLPTR));
         groupBox_2->setTitle(QApplication::translate("saveFileDialog", "\346\230\276\347\244\272\350\256\276\347\275\256\357\274\232", Q_NULLPTR));
         label_2->setText(QApplication::translate("saveFileDialog", "     \346\230\276\347\244\272\345\234\206\345\221\250\346\225\260\357\274\232", Q_NULLPTR));
-        label_3->setText(QApplication::translate("saveFileDialog", "\346\230\276\347\244\272\346\234\200\345\244\247\345\215\212\345\276\204(m)\357\274\232", Q_NULLPTR));
     } // retranslateUi
 
 };
