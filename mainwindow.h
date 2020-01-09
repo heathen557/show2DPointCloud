@@ -8,6 +8,7 @@
 #include<settingdialog.h>
 #include<savefiledialog.h>
 #include<savelocalfile.h>
+#include"receserial_msg.h"
 #include<QThread>
 
 namespace Ui {
@@ -26,7 +27,7 @@ private:
     Ui::MainWindow *ui;
     settingDialog *setDia;
     saveFileDialog saveDia;
-    QSerialPort *serial;
+
     QTimer myReadTimer;
     QString m_buffer;
     int lastAngleInt;         //保存上次的角度，方便判断是否一圈结束
@@ -48,21 +49,33 @@ private:
     float receRotation;     //协议中携带的转速
 
 
+    receSerial_msg *receSerial_obj;
+    QThread *receSeri_thread;
+
+    bool isSerialOpenFlag;
+
+
+
 public slots:
     void showSettingDialog();   //串口设置界面
-    void readData();            //读取串口数据
-    void seriOpen_slot();       //打开串口
+
+    void seriOpen_slot(bool);       //打开串口
     void closeConnect();        //关闭串口
     void transCheckSlot();      //获取传输速率
     void showSaveFileDialog();  //文件保存设置界面
 
     void saveSubmitSlot(bool isSave,int circleNum, int radiusMeter);  //接收是否保存命令
-    bool msgCheck(QString msg);  //和校验
-    int findComplement(int num);  //二进制取反
+
+    void sendRotateSpeed_slot(float,float);
+
+    void returnLinkInfo_slot(QString,bool);   //串口连接的返回信息
 
 signals:
     void createDirSignal(QString);
     void writeLogSignal(QString,int);
+
+    void seriOpen_signal(bool);
+    void sendSerialSignal(QByteArray);   //串口发送数据
 
 private slots:
     void on_startRotate_pushButton_clicked();

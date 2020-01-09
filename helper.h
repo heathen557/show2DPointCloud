@@ -55,6 +55,7 @@
 #include <QFont>
 #include <QPen>
 #include <QWidget>
+#include"globaldata.h"
 
 //! [0]
 class Helper
@@ -79,6 +80,8 @@ public:
     int show_x;
     int show_y;
     int showDistance;
+
+    vector<vector<float>> AllPoint_vec_;
 
 private:
     QBrush background;

@@ -158,7 +158,7 @@ public:
         label_2->setText(QApplication::translate("MainWindow", "\350\275\254\351\200\237\357\274\232", Q_NULLPTR));
         showlabel_2->setText(QApplication::translate("MainWindow", "0 R/s", Q_NULLPTR));
         label_3->setText(QApplication::translate("MainWindow", "\347\220\206\350\256\272\350\275\254\351\200\237\357\274\232", Q_NULLPTR));
-        Rotation_label->setText(QApplication::translate("MainWindow", "0 R/s", Q_NULLPTR));
+        Rotation_label->setText(QApplication::translate("MainWindow", "0 R/min", Q_NULLPTR));
         startRotate_pushButton->setText(QApplication::translate("MainWindow", "\345\274\200\345\247\213\346\227\213\350\275\254", Q_NULLPTR));
         menu->setTitle(QApplication::translate("MainWindow", "\345\212\237\350\203\275\351\200\211\351\241\271", Q_NULLPTR));
     } // retranslateUi

@@ -54,11 +54,9 @@
 #include <QPaintEvent>
 #include <QWidget>
 #include<QDebug>
-#include<vector>
-#include<iostream>
-#include<math.h>
-using namespace std;
 
+
+QMutex m_mutex;
 vector<vector<float>> AllPoint_vec;
 
 #define pi 3.14159
@@ -103,6 +101,9 @@ Helper::Helper()
 void Helper::paint(QPainter *painter, QPaintEvent *event, int elapsed)
 {
 
+    m_mutex.lock();
+    AllPoint_vec_ = AllPoint_vec;
+    m_mutex.unlock();
 
 //    qDebug()<<"paint";
 
@@ -133,21 +134,21 @@ void Helper::paint(QPainter *painter, QPaintEvent *event, int elapsed)
 
     painter->setPen(circlePen);
     QPointF pointf[10000];
-    int allLen = AllPoint_vec.size();
+    int allLen = AllPoint_vec_.size();
 
 //    qDebug()<<"allLen = "<<allLen;
 
     for(int m=0; m<allLen; m++)
     {
-        int len =AllPoint_vec[m].size();
+        int len =AllPoint_vec_[m].size();
         int pointNum = 0;
         for(int n=0; n<len-1; n+=2)
         {
             pointf[pointNum].setX(0);
             pointf[pointNum].setY(0);
 
-            ang = AllPoint_vec[m][n];
-            distance = AllPoint_vec[m][n+1];
+            ang = AllPoint_vec_[m][n];
+            distance = AllPoint_vec_[m][n+1];
 
 
 

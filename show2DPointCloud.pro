@@ -34,7 +34,8 @@ SOURCES += main.cpp\
     savefiledialog.cpp \
     savelocalfile.cpp \
     globaldata.cpp \
-    WriteLog.cpp
+    WriteLog.cpp \
+    receserial_msg.cpp
 
 HEADERS  += mainwindow.h \
     glwidget.h \
@@ -43,7 +44,8 @@ HEADERS  += mainwindow.h \
     savefiledialog.h \
     savelocalfile.h \
     globaldata.h \
-    WriteLog.h
+    WriteLog.h \
+    receserial_msg.h
 
 FORMS    += mainwindow.ui \
     settingdialog.ui \

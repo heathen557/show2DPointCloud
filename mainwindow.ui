@@ -67,7 +67,7 @@
       <item>
        <widget class="QLabel" name="Rotation_label">
         <property name="text">
-         <string>0 R/s</string>
+         <string>0 R/min</string>
         </property>
        </widget>
       </item>

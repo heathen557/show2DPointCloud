@@ -1,8 +1,12 @@
-#ifndef SETTINGDIALOG_H
+﻿#ifndef SETTINGDIALOG_H
 #define SETTINGDIALOG_H
 
 #include <QDialog>
-#include <QtSerialPort/QSerialPort>
+
+#include<QMessageBox>
+#include<QDebug>
+#include<QFile>
+#include<globaldata.h>
 
 namespace Ui {
 class settingDialog;
@@ -17,22 +21,7 @@ public:
     ~settingDialog();
     void seriaPort_init();
 
-    struct Settings {
-        QString name;
-        qint32 baudRate;
-        QString stringBaudRate;
-        QSerialPort::DataBits dataBits;
-        QString stringDataBits;
-        QSerialPort::Parity parity;
-        QString stringParity;
-        QSerialPort::StopBits stopBits;
-        QString stringStopBits;
-        QSerialPort::FlowControl flowControl;
-        QString stringFlowControl;
-        bool localEchoEnabled;
-    };
 
-        Settings currentSettings;
 private slots:
     void on_btnOpen_clicked();
 
@@ -41,7 +30,7 @@ private:
 
 
 signals:
-    void seriOpen_signal();
+    void seriOpen_signal(bool );
     void saveSubmitSignal(bool isSave,int circleNum,int radiusMeter);
 
 };

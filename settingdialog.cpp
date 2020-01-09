@@ -1,8 +1,8 @@
 ﻿#include "settingdialog.h"
 #include "ui_settingdialog.h"
-#include<QMessageBox>
-#include<QDebug>
-#include<QFile>
+
+
+Settings currentSettings;
 
 settingDialog::settingDialog(QWidget *parent) :
     QDialog(parent),
@@ -107,27 +107,13 @@ void settingDialog::on_btnOpen_clicked()
                     ui->stopBitsBox->itemData(ui->stopBitsBox->currentIndex()).toInt());
         currentSettings.stringStopBits = ui->stopBitsBox->currentText();
 
-//        serial->setPortName(currentSettings.name);
-//        serial->setBaudRate(currentSettings.baudRate);
-//        serial->setDataBits(currentSettings.dataBits);
-//        serial->setParity(currentSettings.parity);
-//        serial->setStopBits(currentSettings.stopBits);
-//        serial->setFlowControl(currentSettings.flowControl);
-//        if (serial->open(QIODevice::ReadWrite)) {
-//        } else {
-//            QMessageBox::critical(this, tr("Error"), serial->errorString());
-//        }
 
-
-//        ui->widget->timer.start(5);
-//        transTimer.start(1000);
          qDebug()<<"name="<<currentSettings.name<<" baudRate ="<<currentSettings.baudRate<<" dataBits="<<currentSettings.dataBits<<" parity="<<currentSettings.parity<<" stopBits="<<currentSettings.stopBits<<" flowCon"<<currentSettings.flowControl;
 
-//         ui->labIsOpen->setText("串口状态：打开");
-//         ui->label_show_2->setText("5 ms ");
 
-         emit seriOpen_signal();
-//         ui->btnOpen->setText("关闭串口");
+         bool  flag = true;
+         emit seriOpen_signal(flag);
+
 
          QFile file("setting.ini");
          QByteArray temp("\r\n");
@@ -160,15 +146,6 @@ void settingDialog::on_btnOpen_clicked()
              file.close();
          }
 
-//        int saveInt = line[3].toInt();
-//        bool saveFlag ;
-//        if(1 == saveInt)
-//        {
-//            saveFlag = true;
-//        }else
-//        {
-//            saveFlag = false;
-//        }
 
         bool saveFlag = false;
         int showCircleNum = line[2].toInt() ;

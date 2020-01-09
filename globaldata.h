@@ -1,6 +1,33 @@
-#ifndef GLOBALDATA_H
+﻿#ifndef GLOBALDATA_H
 #define GLOBALDATA_H
 #include<QString>
+#include <QtSerialPort/QSerialPort>
+#include<QtSerialPort/QSerialPortInfo>
+#include<qmutex.h>
+#include<vector>
+#include<iostream>
+#include<math.h>
+#include<QTimer>
+using namespace std;
+
+
+
+struct Settings {
+    QString name;
+    qint32 baudRate;
+    QString stringBaudRate;
+    QSerialPort::DataBits dataBits;
+    QString stringDataBits;
+    QSerialPort::Parity parity;
+    QString stringParity;
+    QSerialPort::StopBits stopBits;
+    QString stringStopBits;
+    QSerialPort::FlowControl flowControl;
+    QString stringFlowControl;
+    bool localEchoEnabled;
+};
+
+
 enum DiskspaceFlag
 {
 	NoSpace,
