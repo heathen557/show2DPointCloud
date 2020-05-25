@@ -77,7 +77,7 @@ void GLWidget::mousePressEvent(QMouseEvent *e)
             clickangle = 180+ ang*180/3.1415926;
         }
 
-        //如果在第四想想  90-179
+        //如果在第四象限  90-179
         else if((x>x_radius) && (y>y_radius))
         {
             float xOffset = x - x_radius;
@@ -99,8 +99,10 @@ void GLWidget::mousePressEvent(QMouseEvent *e)
 
 void GLWidget::wheelEvent(QWheelEvent *event)
 {
-    if(!isBeginWheel)
-        return;
+
+    qDebug()<<" GLWidget::wheelEvent(QWheelEvent *event) ";
+//    if(!isBeginWheel)
+//        return;
 
     if(event->delta() > 0) //当滚轮向上滑，远离使用者
     {

@@ -25,7 +25,9 @@ public:
 
     QByteArray m_buffer;
 
-    int firstAngle;
+    float firstAngle;
+
+    float lastAngle;
 
     float receRotation;
 
@@ -65,8 +67,6 @@ public slots:
     void openOrCloseSerial_slot(bool);
 
     void sendSerialSlot(QByteArray);              //串口发送数据的槽函数
-
-    QString addCheck(QString);
 
 };
 
