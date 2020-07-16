@@ -179,7 +179,7 @@ void Helper::paint(QPainter *painter, QPaintEvent *event, int elapsed)
 
 //            qDebug()<<"ang="<<ang<<"  x="<<x<<"  y="<<y;
 
-            if(ang == clickAngle)
+            if(int(ang) == int(clickAngle))
             {
                 show_x = x;
                 show_y = y;

@@ -27,6 +27,8 @@ public:
 
     float firstAngle;
 
+    float endAngle;
+
     float lastAngle;
 
     float receRotation;
@@ -42,6 +44,8 @@ public:
     int showCircleNum;
 
     vector<float> Rece_points;
+
+    QString saveData;
 
 
 

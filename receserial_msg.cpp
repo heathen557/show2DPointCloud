@@ -65,7 +65,7 @@ void receSerial_msg::readDataSlot()
     QByteArray temp = serial->readAll();
     QString strHex;//16进制数据
 
-    int singleLen = 22*2;   //一包数据22个字节
+    int singleLen = 10*2;   //一包数据10个字节
 
     if (!temp.isEmpty())
     {
@@ -91,13 +91,16 @@ void receSerial_msg::readDataSlot()
 
         m_buffer.append(strHex);
 
+//        qDebug()<<"m_buffer = "<<m_buffer;
+//        return;
+
         int totallen = m_buffer.size();
         while(totallen)
         {
             if(totallen <singleLen)    //一个报文至少要有44个字节
                 return;
 
-           int indexOf5A = m_buffer.indexOf("5A",0);
+           int indexOf5A = m_buffer.indexOf("5A83",0);
            if(indexOf5A < 0)  //没有找到5A
            {
                qDebug()<<QString::fromUtf8("msg maybe error,can't find FA")<<"index ="<<indexOf5A<<"buffer"<<m_buffer<<endl;
@@ -106,14 +109,28 @@ void receSerial_msg::readDataSlot()
            {
                m_buffer = m_buffer.right(totallen-indexOf5A);
                totallen = m_buffer.size();
-               qDebug()<<"the first msg ,has some Redundant data,  indexOf5A="<<indexOf5A<<"  the left msg = "<<m_buffer<<endl;
+//               qDebug()<<"the first msg ,has some Redundant data,  indexOf5A="<<indexOf5A<<"  the left msg = "<<m_buffer<<endl;
                if(totallen <singleLen)
                    return;
            }
 
+           QString lenStr= m_buffer.mid(6,2) + m_buffer.mid(4,2);
+           int dataLen = lenStr.toInt(NULL,16) * 2;
+           int len = dataLen + 5*2;
+
+
+
+           float pointNum = (lenStr.toInt(NULL,16) - 6)/3;  //一包有多少个点
+
+//           qDebug()<<"dataLen ="<<dataLen/2<<"   pointNum="<<pointNum;
+
+           if(totallen<len)
+               return;
+
+
            //以下数据为FA打头数据
            //进行校验的操作
-           QString single_Data = m_buffer.left(singleLen);     //一帧数据
+           QString single_Data = m_buffer.left(len);     //一帧数据
 //           qDebug()<<"singleData = "<<single_Data;
 
            if(!msgCheck(single_Data))
@@ -127,35 +144,57 @@ void receSerial_msg::readDataSlot()
 
 
            // 1、转速
-           QString RotationSpeed_str = single_Data.mid(6,2) + single_Data.mid(4,2);
+           QString RotationSpeed_str = single_Data.mid(10,2) + single_Data.mid(8,2);
            float tmpRotation_ = RotationSpeed_str.toInt(NULL,16);
            receRotation = tmpRotation_ / 100.0;         //实际值扩大100倍
 
+
+
            //2、起始角度
-           QString firstAngStr = single_Data.mid(10,2) + single_Data.mid(8,2);
+           QString firstAngStr = single_Data.mid(14,2) + single_Data.mid(12,2);
            float firstAngfloat = firstAngStr.toInt(NULL,16);
            firstAngle = firstAngfloat/100.0;
            // 3 角度分辨率
-           float angle_offset = firstAngfloat*360.0/100.0/4800.0;
+//           float angle_offset = receRotation*360.0/100.0/4800.0;
 
-           //4、一包数据包含了5个点的数据、
+
+           //3、结束角度
+           QString endAngleStr =  single_Data.mid(18,2) + single_Data.mid(16,2);
+           float endAnglefloat = endAngleStr.toInt(NULL,16);
+           endAngle = endAnglefloat/100.0;
+
+           if((0 ==int(endAngle)) && endAngle<firstAngle)
+               endAngle = 360.0;
+
+           // 4、角度分辨率
+           float angle_oneOffset = (endAngle - firstAngle)/pointNum;
+
+
+//           qDebug()<<"receRotation = "<<receRotation<<"   firstAngle="<<firstAngle<<"  endAngle="<<endAngle<<"  angle_offset="<<angle_oneOffset;
+           //4、一包数据包含了6个点的数据、
            QString distanceStr;
            QString peakStr;
            float angleTmp;
            int distanceInt;
-           for(int j=0; j<5; j++)
+           int package = pointNum;
+           for(int j=0; j<package; j++)
            {
-               angleTmp = firstAngle + angle_offset *(j-1);
-               distanceStr = single_Data.mid(12+6*j+2,2 ) + single_Data.mid(12+6*j+0,2);
+               angleTmp = firstAngle + j*angle_oneOffset;
+               distanceStr = single_Data.mid(20+6*j+2,2 ) + single_Data.mid(20+6*j+0,2);
                distanceInt = distanceStr.toInt(NULL,16);
 
-               peakStr = single_Data.mid(12+6*j+4,2) ;
+               peakStr = single_Data.mid(20+6*j+4,2) ;
 
                Rece_points.push_back(angleTmp);
                Rece_points.push_back(distanceInt);
+//               Rece_points.push_back(3000);
+
+//               qDebug()<<"angleTmp = "<<angleTmp<<"    distance ="<<distanceInt;
+
+
 
            }
-           QString saveData = single_Data+"  "+ QString::number(firstAngle) +"  " ;
+//           QString saveData = single_Data+"  "+ QString::number(firstAngle) +"  " ;
 
 
 
@@ -197,15 +236,15 @@ void receSerial_msg::readDataSlot()
 //            QString saveData = single_Data+"  "+ QString::number(firstAngle) +"  " + QString::number(distanceInt_1)  ;
 
 
-            //生成数据文件
-            if(true == isSaveFlag  && saveCircleNum >= 3)
-            {
-               saveFileIndex++;
-               saveCircleNum = 5;  //设置为一个大于3的数字即可
-               emit writeLogSignal(saveData,saveFileIndex);
-            }
+//            //生成数据文件
+//            if(true == isSaveFlag  && saveCircleNum >= 3)
+//            {
+//               saveFileIndex++;
+//               saveCircleNum = 5;  //设置为一个大于3的数字即可
+//               emit writeLogSignal(saveData,saveFileIndex);
+//            }
 
-           if(firstAngle<lastAngle && (!Rece_points.empty()) )  //360度已经接收完毕
+           if(360 == int(endAngle) && (!Rece_points.empty()) )  //360度已经接收完毕
            {
                saveCircleNum++;
                emit sendRotateSpeed_signal(1,receRotation);   //一圈发送一次
@@ -224,9 +263,23 @@ void receSerial_msg::readDataSlot()
                    AllPoint_vec.clear();
                }
                m_mutex.unlock();
+
+
+
+               //生成数据文件
+               if(true == isSaveFlag  && saveCircleNum >= 3)
+               {
+                  saveFileIndex++;
+                  saveCircleNum = 5;  //设置为一个大于3的数字即可
+                  emit writeLogSignal(saveData,saveFileIndex);
+               }
+               saveData.clear();
+
            }
 
-           m_buffer = m_buffer.right(totallen - singleLen);
+           saveData.append(single_Data).append("\n");
+
+           m_buffer = m_buffer.right(totallen - len);
            totallen = m_buffer.size();
 
 
@@ -280,7 +333,6 @@ bool receSerial_msg::msgCheck(QString msg)
     {
         return false;
     }
-
 
 }
 

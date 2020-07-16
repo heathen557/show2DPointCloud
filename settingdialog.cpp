@@ -51,7 +51,7 @@ void settingDialog::seriaPort_init()
     ui->baudRateBox->addItem(QStringLiteral("19200"), QSerialPort::Baud19200);
     ui->baudRateBox->addItem(QStringLiteral("38400"), QSerialPort::Baud38400);
     ui->baudRateBox->addItem(QStringLiteral("115200"), QSerialPort::Baud115200);
-    ui->baudRateBox->addItem(QStringLiteral("256000"), QSerialPort::Baud256000);
+    ui->baudRateBox->addItem(QStringLiteral("230400"), QSerialPort::Baud230400);
     ui->baudRateBox->addItem(QStringLiteral("256000"), QSerialPort::Baud256000);
     ui->baudRateBox->addItem(QStringLiteral("460800"), QSerialPort::Baud460800);
     ui->baudRateBox->addItem(tr("Custom"));

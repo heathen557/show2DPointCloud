@@ -100,7 +100,7 @@ void GLWidget::mousePressEvent(QMouseEvent *e)
 void GLWidget::wheelEvent(QWheelEvent *event)
 {
 
-    qDebug()<<" GLWidget::wheelEvent(QWheelEvent *event) ";
+//    qDebug()<<" GLWidget::wheelEvent(QWheelEvent *event) ";
 //    if(!isBeginWheel)
 //        return;
 

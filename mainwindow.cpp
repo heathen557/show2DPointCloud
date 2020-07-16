@@ -82,6 +82,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(setDia,SIGNAL(saveSubmitSignal(bool,int,int)),this,SLOT(saveSubmitSlot(bool,int,int)));
 
 
+    //转速
+    connect(receSerial_obj,&receSerial_msg::sendRotateSpeed_signal,this,&MainWindow::sendRotateSpeed_slot);
+
 
 }
 
@@ -177,7 +180,7 @@ void MainWindow::transCheckSlot()
     ui->showlabel_2->setText(str);
     numOfCircle = 0;
 
-    QString str_2 = QString::number(receRotation)+"R/min";
+    QString str_2 = QString::number(receRotation)+"R/s";
     ui->Rotation_label->setText(str_2);
 
 
